@@ -1,8 +1,7 @@
+const { checkNewContact, getMaxId } = require('./functions');
 const path = require('path');
 const fs = require('fs').promises;
-const shortPath = './db/contacts.json';
-const contactsPath = path.resolve(shortPath);
-const { checkNewContact, getMaxId } = require('./functions');
+const contactsPath = path.resolve('./db/contacts.json');
 
 function listContacts() {
   try {
@@ -29,10 +28,11 @@ async function removeContact(contactId) {
     (async () => {
       await fs.writeFile(contactsPath, JSON.stringify(filtredContacts), 'utf8');
     })();
-    return true;
+    console.log('contact with id - ' + contactId + ' removed successfully');
+    return filtredContacts;
   } catch (error) {
     console.log(error);
-    return error;
+    return false;
   }
 }
 
@@ -44,15 +44,17 @@ async function addContact(name, email, phone) {
     return false;
   }
   const phoneString = '(' + phone.slice(0, 3) + ') ' + phone.slice(3, 6) + '-' + phone.slice(6, 10);
-  if (!checkNewContact({ id, name, email, phone: phoneString }, contacts)) return false;
+  const newContact = { id, name, email, phone: phoneString };
+  if (!checkNewContact(newContact, contacts)) return false;
   try {
     (async () => {
-      await fs.writeFile(contactsPath, JSON.stringify([...contacts, { id, name, email, phone: phoneString }]), 'utf8');
+      await fs.writeFile(contactsPath, JSON.stringify([...contacts, newContact]), 'utf8');
     })();
-    return true;
+    console.log('contact successfully created');
+    return newContact;
   } catch (error) {
     console.log(error);
-    return error;
+    return false;
   }
 }
 
